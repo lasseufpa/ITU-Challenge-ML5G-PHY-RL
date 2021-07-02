@@ -26,7 +26,7 @@ except OSError as error:
 '''
 Trains an A2C network and stores it in a file.
 '''
-train_ep = 0
+train_ep = int(sys.argv[2])
 e = BeamSelectionEnv(ep=train_ep)
 
 model = A2C(policy="MlpPolicy", 
