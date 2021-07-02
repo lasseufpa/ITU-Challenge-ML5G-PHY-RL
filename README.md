@@ -48,3 +48,24 @@ There are three different types of objects: `uav`, `simulation_car` and `simulat
 
 ## Baseline data
 An episode has information regarding all mobile objects in a scene (all pedestrians, etc.). To keep it simple, we assumed that the baseline RL agent uses only information from the three users (`uav1`, `simulation_car1` and `simulation_pedestrian1`). These are the user equipment (UEs) being served by the base station (BS). Hence, the baseline data was obtained by filtering the original episodes to discard the information about all other mobile objects (which are scatterers, not UEs).
+
+## Training and testing the baseline RL agent
+To train you must run:
+
+`$ python3 train_agent.py 'agent_name' 'number_of_train_episode'`
+
+For example, to create an agent named `test.a2c`, trained on the data from episode 0, the command is:
+
+`$ python3 train_agent.py test 0`
+
+After finishing the training, the agent will be stored in a `./model` folder, created automatically by the end of the first run.
+
+To test your agent you must run:
+
+`$ python3 test_agent.py 'agent_name' 'number_of_test_episode'`
+
+Similarly, to test the agent from the example above in the same episode, one should run:
+
+`$ python3 train_agent.py test 0`
+
+This will create a folder named `./data` in which the actions of the agent will be stored. The actions will receive the name `actions_'agent_name'.csv`.

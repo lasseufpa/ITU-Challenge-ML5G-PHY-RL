@@ -8,6 +8,7 @@ Script to test baseline agent
 V1.0
 '''
 import sys
+import os
 import csv
 import numpy as np
 import pandas as pd
