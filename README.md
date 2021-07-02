@@ -1,3 +1,11 @@
+# Radio Strike
+
+Details about the challenge and the datasets are available at http://ai5gchallenge.ufpa.br.
+
+Registration link: https://challenge.aiforgood.itu.int/match/matchitem/39
+
+Datasets are available at https://nextcloud.lasseufpa.org/s/WYZAMbSbdocs2DL
+
 # Radio Strike Installation
 This instructions will guide you through the process of using Radio Strike. 
 
