@@ -66,6 +66,6 @@ To test your agent you must run:
 
 Similarly, to test the agent from the example above in the same episode, one should run:
 
-`$ python3 train_agent.py test 0`
+`$ python3 test_agent.py test 0`
 
 This will create a folder named `./data` in which the actions of the agent will be stored. The actions will receive the name `actions_'agent_name'.csv`.
