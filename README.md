@@ -1,6 +1,8 @@
 # Radio Strike
 
-Details about the challenge are available at http://ai5gchallenge.ufpa.br.
+Here you find the code for the “ITU-ML5G-PS-006: ML5G-PHY-Reinforcement learning: scheduling and resource allocation”, which is part of the “ITU Artificial Intelligence/Machine Learning in 5G Challenge. 
+
+Details about this challenge are available at http://ai5gchallenge.ufpa.br.
 
 Registration link: https://challenge.aiforgood.itu.int/match/matchitem/39
 
