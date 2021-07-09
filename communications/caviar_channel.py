@@ -6,7 +6,7 @@ import os
 from .processChannelRandomGeo import ULAChannelRandomGeo, UPAChannelRandomGeo
 import numpy as np
 
-def cart2pol(x, y):
+def cart2pol(x, y, z):
    #Adjust angular domain to X-axis
     if x == 0:
        x += 0.001
@@ -14,12 +14,13 @@ def cart2pol(x, y):
     phi = np.rad2deg(np.arctan2(y, x))
     if phi < 0:
        phi +=  360
-    return(rho, phi)
+    elev = np.rad2deg(np.arccos(z/rho))
+    return(elev, phi)
 
 def drone_info(UE = [5,4,3], Bs = [-15, 30, -1]):
    #Convert to polar domain
-   droneRho, dronePhi = cart2pol(Bs[0]-UE[0],Bs[1]-UE[1])
-   bsRho, bsPhi = cart2pol(UE[0]-Bs[0],UE[1]-Bs[1])
+   droneRho, dronePhi = cart2pol(Bs[0]-UE[0],Bs[1]-UE[1], UE[2]-Bs[2])
+   bsRho, bsPhi = cart2pol(UE[0]-Bs[0],UE[1]-Bs[1], BS[2]-UE[2])
    distance = np.sqrt(((UE[0]-Bs[0])**2)+((UE[1]-Bs[1])**2)+((UE[2]-Bs[2])**2))
    return [bsPhi,dronePhi, bsRho, droneRho, distance]
 
