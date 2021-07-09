@@ -31,24 +31,6 @@ With that you're ready to run the baseline.
 
 ``
 
-## Data organization
-
-The dataset is provided in `.csv` files, that are in the folder `episodes` (i.e `ep0.csv`, `ep1.csv` etc). Each `episode` has approximately 3 minutes of duration, with information stored with a sampling interval of 10 ms. The csv is composed by the following columns:
-
-|timestamp|obj|pos_x|pos_y|pos_z|orien_w|orien_x|
-|---|---|---|---|---|---|---|
-
-|orien_y|orien_z|linear_acc_x|linear_acc_y|linear_acc_z|linear_vel_x|linear_vel_y|
-|---|---|---|---|---|---|---|
-
-|linear_vel_z|angular_acc_x|angular_acc_y|angular_acc_z|angular_vel_x|angular_vel_y|angular_vel_z|
-|---|---|---|---|---|---|---|
-
-There are three different types of objects: `uav`, `simulation_car` and `simulation_pedestrian`. Only the `uav` type has information in all columns, while the others have only information regarding their position and orientation. 
-
-## Baseline data
-An episode has information regarding all mobile objects in a scene (all pedestrians, etc.). To keep it simple, we assumed that the baseline RL agent uses only information from the three users (`uav1`, `simulation_car1` and `simulation_pedestrian1`). These are the user equipment (UEs) being served by the base station (BS). Hence, the baseline data was obtained by filtering the original episodes to discard the information about all other mobile objects (which are scatterers, not UEs).
-
 ## Training and testing the baseline RL agent
 To train you must run:
 
