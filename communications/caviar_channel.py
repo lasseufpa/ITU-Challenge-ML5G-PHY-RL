@@ -20,7 +20,7 @@ def cart2pol(x, y, z):
 def drone_info(UE = [5,4,3], Bs = [-15, 30, -1]):
    #Convert to polar domain
    droneRho, dronePhi = cart2pol(Bs[0]-UE[0],Bs[1]-UE[1], UE[2]-Bs[2])
-   bsRho, bsPhi = cart2pol(UE[0]-Bs[0],UE[1]-Bs[1], BS[2]-UE[2])
+   bsRho, bsPhi = cart2pol(UE[0]-Bs[0],UE[1]-Bs[1], Bs[2]-UE[2])
    distance = np.sqrt(((UE[0]-Bs[0])**2)+((UE[1]-Bs[1])**2)+((UE[2]-Bs[2])**2))
    return [bsPhi,dronePhi, bsRho, droneRho, distance]
 
