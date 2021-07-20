@@ -125,7 +125,7 @@ class BaseStation():
 		done = self._state >= self.ep_lenght
 		feedback = self.UE_feedback(target) 
 		feedback.append(float(self.R))# dropped packets, sent packets and bit rate
-		state = np.concatenate((self.UEs[target].position, feedback), axis=None)
+		state = np.concatenate((self.UEs[target]._position, feedback), axis=None)
 		return state, reward, feedback, done  
 
 	def UE_feedback(self, target):

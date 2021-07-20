@@ -17,11 +17,13 @@ class UE(Buffer):
         self._position = []  # Position [X,Y,Z]
         self.obj_type = obj_type # UAV or Unreal_object
         self.use_airsim = use_airsim
+        self.all_episodes = iter(episode)
+        self._episodeID = next(self.all_episodes)
         if self.use_airsim:
             self.client = caviar_tools.airsim_connect() # Start Airsim
         else:
             self.client = None # None if will note use Airsim
-            self.all_position = caviar_tools.positions_csv(name, episode)
+            self.all_position = caviar_tools.positions_csv(name, self._episodeID)
             self.obj_type = 'CSV'
         #self._all_info = caviar_tools.all_info_csv(name, episode)
         #self.buffer_size = buffer_size
@@ -32,11 +34,9 @@ class UE(Buffer):
     def ID(self):
         return self._ID
     
-    '''
     @property
-    def info(self):
-        return self._all_info
-    '''
+    def episodeID(self):
+        return self._episodeID
 
     def get_pkt_throughput( self, RMbps):
         """
@@ -55,16 +55,25 @@ class UE(Buffer):
         and return a list as [x,y,z] -> [N,E,D] (Airsim domain)
         Important: -D is Up and +D is down
         """ 
-        # TO-DO - Read CSV position dataset
         if self.obj_type == 'UAV':
             self._position = caviar_tools.airsim_getpose(self.client, self._ID)
         elif self.obj_type == 'PED' or self.obj_type == 'CAR' : 
             self._position = caviar_tools.unreal_getpose(self.client, self._ID)
         elif self.obj_type == 'CSV':
-            tmp_list = next(self.all_position).split(',')
+            try:
+                tmp_list = next(self.all_position).split(',')
+            except StopIteration:
+                try:
+                    self._episodeID = next(self.all_episodes)
+                except StopIteration:
+                    raise TypeError("Episodes over")
+                self.all_position = caviar_tools.positions_csv(self._ID, self._episodeID)
+                tmp_list = next(self.all_position).split(',')
+            except:
+                raise TypeError("Can't access the episode file")
             self._position = [float(p) for p in tmp_list]
         elif self.obj_type == 'automated_test':
-            self._position = [np.random.randint(10,50), np.random.randint(10,50), np.random.randint(-1,2)]
+            self._position = [np.random.randint(10,50), np.random.randint(10,50), np.random.randint(-1,2)] #Only for debug tests
         else:
             raise TypeError("It's not a valid type of object")
         return self._position

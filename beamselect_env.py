@@ -19,7 +19,7 @@ from communications.base_station import BaseStation
 from communications.ue import UE
 
 class BeamSelectionEnv(Env):
-    def __init__(self, ep=0):
+    def __init__(self, ep=[0]):
         # Which episode to take data from (Only used when use_airsim=False).
         self.eps = ep
         '''

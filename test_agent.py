@@ -56,6 +56,6 @@ $ python3 test_agent.py test 1
 
 model_name = str(sys.argv[1])
 model_file_name = "./model/"+str(sys.argv[1])+".a2c"
-#test_ep = [sys.argv[2]]
-test_ep = sys.argv[2]
+test_ep = [sys.argv[2]]
+#test_ep = sys.argv[2]
 test_beam_selection(model_file_name, model_name, test_ep)
