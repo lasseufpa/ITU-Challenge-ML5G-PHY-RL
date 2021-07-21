@@ -14,7 +14,7 @@ def cart2pol(x, y, z):
     phi = np.rad2deg(np.arctan2(y, x))
     if phi < 0:
        phi +=  360
-    elev = np.rad2deg(np.arccos(z/rho))
+    elev = np.rad2deg(np.arccos(round(z/rho)))
     return(elev, phi)
 
 def drone_info(UE = [5,4,3], Bs = [-15, 30, -1]):
