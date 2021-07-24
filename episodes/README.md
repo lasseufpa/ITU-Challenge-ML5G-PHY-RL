@@ -1,10 +1,9 @@
-# Radio Strike
+# Radio Strike main links
+>Details about the challenge are available at http://ai5gchallenge.ufpa.br.
 
-Details about the challenge are available at http://ai5gchallenge.ufpa.br.
+>Registration link: https://challenge.aiforgood.itu.int/match/matchitem/39
 
-Registration link: https://challenge.aiforgood.itu.int/match/matchitem/39
-
-Datasets are available at https://nextcloud.lasseufpa.org/s/WYZAMbSbdocs2DL
+>Datasets and the renderer (CaviarRenderer-ITU-v1) are available at https://nextcloud.lasseufpa.org/s/WYZAMbSbdocs2DL
 
 #  Data preprocessing
 
