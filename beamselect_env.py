@@ -1,7 +1,7 @@
 '''
 UFPA - LASSE - Telecommunications, Automation and Electronics Research and Development Center - www.lasse.ufpa.br
 CAVIAR - Communication Networks and Artificial Intelligence Immersed in Virtual or Augmented Reality
-Ailton Oliveira, Felipe Bastos, João Borges, Emerson Oliveira, Daniel Takashi, Lucas Matni, Rebecca Aben-Athar, Aldebaro Klautau (UFPA): aldebaro@ufpa.br
+Ailton Oliveira, Felipe Bastos, João Borges, Emerson Oliveira, Daniel Suzuki, Lucas Matni, Rebecca Aben-Athar, Aldebaro Klautau (UFPA): aldebaro@ufpa.br
 CAVIAR: https://github.com/lasseufpa/ITU-Challenge-ML5G-PHY-RL.git
 
 Enviroment for reinforcement learning applied to Beam-selection
@@ -28,7 +28,8 @@ class BeamSelectionEnv(Env):
         self.ue1 = UE(name='uav1', obj_type='UAV', total_number_rbs=15, episode = self.eps, use_airsim=False)
         self.ue2 = UE(name='simulation_car1', obj_type='CAR', total_number_rbs=15, episode = self.eps, use_airsim=False)
         self.ue3 = UE(name='simulation_pedestrian1', obj_type='PED', total_number_rbs=15, episode = self.eps, use_airsim=False)
-        self.caviar_bs = BaseStation(Elements=64, frequency=60e9,name='BS1',ep_lenght=20)
+        self.caviar_bs = BaseStation(Elements=64, frequency=60e9,name='BS1',ep_lenght=20, traffic_type = 'dense', change_type=True)
+
         #Append users
         self.caviar_bs.append(self.ue1)
         self.caviar_bs.append(self.ue2)
@@ -37,13 +38,13 @@ class BeamSelectionEnv(Env):
         '''
         The observation space is composed by an array with 6 float numbers. 
         The first three represent the user position in XYZ, while the 
-        remaining ones are respectively: dropped packages, sent packages 
-        and bit rate.
+        remaining ones are respectively: dropped packages, sent packages, 
+        buffered and bit rate.
         '''        
         self.observation_space = Box(
-            low=np.array([-5e2,-5e2,-5e2,0,0,0]), 
-            high=np.array([5e2,5e2,5e2,1e3,1e3,1e9]),
-            shape=(6,)
+            low=np.array([-5e2,-5e2,-5e2,-5e2,0,0,0]), 
+            high=np.array([5e2,5e2,5e2,5e2,1e3,1e3,1e9]),
+            shape=(7,)
     )
         '''
         The action space is composed by an array with two integers. The first one 
@@ -56,7 +57,7 @@ class BeamSelectionEnv(Env):
 
 
     def reset(self):
-        self._state = np.zeros(6)
+        self._state = np.zeros(7)
         return self._state
     
     '''
@@ -67,8 +68,16 @@ class BeamSelectionEnv(Env):
     '''
     def step(self, action):
         target, index = action
-        state, reward, feedback, done = self.caviar_bs.step(target,index)
-        dict_keys = ['x', 'y', 'z', 'dropped_packets', 'sent_packets', 'bit_rate']
-        feedback = dict(zip(dict_keys, feedback))
+        state, reward, info, done = self.caviar_bs.step(target,index)
+        dict_keys = ['pkts_dropped', 'pkts_transmitted', 'pkts_buffered', 'bit_rate', 'chosen_ue', 'packets', 'channel_mag']
+        info = dict(zip(dict_keys, info))
         self.state = state
-        return self.state, np.array(reward), done, feedback
+        return self.state, reward, done, info
+    
+    def best_beam_step(self, target):
+        state, reward, info, done = self.caviar_bs.best_beam_step(target)
+                     # dropped packets, sent packets, buffered packets, bitrate, ue_name, packets and channel_mag
+        dict_keys = ['pkts_dropped', 'pkts_transmitted', 'pkts_buffered', 'bit_rate', 'chosen_ue', 'best_beam', 'packets', 'channel_mag']
+        info = dict(zip(dict_keys, info))
+        self.state = state
+        return self.state, reward, done, info

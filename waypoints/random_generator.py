@@ -1,7 +1,7 @@
 '''
 UFPA - LASSE - Telecommunications, Automation and Electronics Research and Development Center - www.lasse.ufpa.br
 CAVIAR - Communication Networks and Artificial Intelligence Immersed in Virtual or Augmented Reality
-Ailton Oliveira, Felipe Bastos, João Borges, Emerson Oliveira, Daniel Takashi, Lucas Matni, Rebecca Aben-Athar, Aldebaro Klautau (UFPA): aldebaro@ufpa.br
+Ailton Oliveira, Felipe Bastos, João Borges, Emerson Oliveira, Daniel Suzuki, Lucas Matni, Rebecca Aben-Athar, Aldebaro Klautau (UFPA): aldebaro@ufpa.br
 CAVIAR: https://github.com/lasseufpa/ITU-Challenge-ML5G-PHY-RL.git
 '''
 
@@ -16,7 +16,7 @@ import os
 import random
 from copy import deepcopy
 
-n_trajectories = 200
+n_trajectories = 500
 
 def shuffle_weight():
   return random.random()

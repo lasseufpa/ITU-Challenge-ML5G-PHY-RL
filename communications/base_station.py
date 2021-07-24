@@ -18,7 +18,7 @@ class BaseStation():
 		w = np.exp(-1j * 2 * np.pi * mat / dim)
 		return w
 
-	def __init__(self, Elements = 64, frequency = 60e9,bandwidth = 100e6, name='', ep_lenght = 200, traffic_type = 'light', BS_type = 'ULA'):
+	def __init__(self, Elements = 64, frequency = 60e9,bandwidth = 100e6, name='', ep_lenght = 200, traffic_type = 'light', BS_type = 'ULA', change_type=False):
 		self._NTx = Elements # NUmber of MIMO elements in BS
 		self.codebook_tx = self.dft_codebook(Elements)
 		self.Channel = None # Channel matrix
@@ -33,6 +33,7 @@ class BaseStation():
 		self._type = BS_type 
 		self._traffic_type = traffic_type
 		self.R = 0
+		self.change_type = change_type
 
 	@property
 	def ID(self):
@@ -64,19 +65,33 @@ class BaseStation():
 		self.se = np.log2(1+SINR)
 		self.R = float(self.bandwidth * self.se)
 
-	def packages(self, traffic, packet_size):
+	def packages(self, traffic, packet_size, ue_type):
 		""" 
 		Alocate packages for each user in a time slot (10ms)
 		"""
-		np.random.poisson(lam=(1e7/packet_size))
-		if traffic == 'light': # 1Gbps -> 1e7Gb per 10ms
-			package_capacity = np.floor(np.random.poisson(lam=(1e7/packet_size)))
-		elif traffic == 'dense': # 3Gpbs -> 3e7Gb per 10ms
-			package_capacity = np.ceil(np.random.poisson(lam=(3e7/packet_size)))	
+		if traffic == "light":  # 1Gbps -> 1e7Gb per 10ms
+			total_throughput = 6e7
+		elif traffic == "dense":  # 3Gpbs -> 3e7Gb per 10ms
+			total_throughput = 12e7
 		else:
 			raise TypeError("It's not a valid type of traffic")
-		return package_capacity
 
+		if ue_type == "UAV":
+			throughput = np.floor(
+				np.random.poisson(lam=(0.5 * total_throughput) / packet_size)
+			)
+		elif ue_type == "CAR":
+			throughput = np.floor(
+				np.random.poisson(lam=(0.3 * total_throughput) / packet_size)
+			)
+		elif ue_type == "PED":
+			throughput = np.floor(
+				np.random.poisson(lam=(0.2 * total_throughput) / packet_size)
+			)
+		else:
+			raise TypeError("Invalid UE type")
+
+		return throughput
 		
 	def H_matrix(self, target):
 		"""
@@ -110,23 +125,80 @@ class BaseStation():
 		"""
         Executes the BS channel processing integrate with UE packets processing.
         """
-		packets = self.packages(self._traffic_type, self.UEs[target].packet_size)
-		reward = self.H_mag(target, action)
+		packets = self.packages(self._traffic_type, self.UEs[target].packet_size, self.UEs[target].obj_type)
+		channel_mag = self.H_mag(target, action)
+		self.Bit_rate(channel_mag,440.35)
+		self.UEs[target].step(packets, self.R)
+
+		# Step for not target UE's 
+		for i in range(len(self.UEs)):
+			if i != target:
+				d_packets = self.packages(self._traffic_type, self.UEs[i].packet_size, self.UEs[i].obj_type)
+				self.UEs[i].step(d_packets, 0)
+
+		self._state += 1
+		if self.change_type:
+			update_traffic = self._state % 1000
+			if not update_traffic:
+				if self._traffic_type == 'dense':
+					self._traffic_type = 'light'
+				else:
+					self._traffic_type = 'dense'
+
+		done = self._state >= self.ep_lenght
+		feedback = self.UE_feedback(target)# dropped packets, sent packets and buffered packets 
+		feedback.append(float(self.R))# dropped packets, sent packets, buffered packets and bitrate
+		info = feedback[:]
+		info.append(str(self.UEs[target]._ID))# dropped packets, sent packets, buffered packets, bitrate and ue_name
+		info.append(packets)# dropped packets, sent packets, buffered packets, bitrate, ue_name and packets
+		info.append(channel_mag)# dropped packets, sent packets, buffered packets, bitrate, ue_name, packets and channel_mag
+		dropped_packets = info[0]
+		sent_packets = info[1]
+		buffered_packets = info[2]
+		
+		if buffered_packets > 0:
+			reward = (sent_packets - 2*dropped_packets)/buffered_packets
+		else:
+			reward = 0
+
+		state = np.concatenate((self.UEs[target]._position, feedback), axis=None)
+		return state, reward, info, done 
+	
+	def best_beam_step(self, target):
+		"""
+        Executes the BS channel processing integrate with UE packets processing.
+        """
+		packets = self.packages(self._traffic_type, self.UEs[target].packet_size, self.UEs[target].obj_type)
+		self.H_matrix(target)
+		index = self.best_beam()
+		reward = np.squeeze(np.array(chosen_precoder(index,self.Channel,self.codebook_tx)))
 		self.Bit_rate(reward,440.35)
 		self.UEs[target].step(packets, self.R)
 
 		# Step for not target UE's 
 		for i in range(len(self.UEs)):
 			if i != target:
-				d_packets = self.packages(self._traffic_type, self.UEs[i].packet_size)
+				d_packets = self.packages(self._traffic_type, self.UEs[i].packet_size, self.UEs[i].obj_type)
 				self.UEs[i].step(d_packets, 0)
 
 		self._state += 1
+		if self.change_type:
+			update_traffic = self._state % 1000
+			if not update_traffic:
+				if self._traffic_type == 'dense':
+					self._traffic_type = 'light'
+				else:
+					self._traffic_type = 'dense'
+				
 		done = self._state >= self.ep_lenght
-		feedback = self.UE_feedback(target) 
-		feedback.append(float(self.R))# dropped packets, sent packets and bit rate
+		feedback = self.UE_feedback(target)# dropped packets and sent packets 
+		feedback.append(float(self.R))# dropped packets, sent packets and bitrate
+		info = feedback[:]
+		info.append(str(self.UEs[target]._ID))# dropped packets, sent packets, bitrate and ue_name
+		info.append(index)
+		info.append(packets)
 		state = np.concatenate((self.UEs[target]._position, feedback), axis=None)
-		return state, reward, feedback, done  
+		return state, reward, info, done  
 
 	def UE_feedback(self, target):
 		"""
@@ -136,7 +208,7 @@ class BaseStation():
 		for i in range(len(self.UEs)):
 			dropped += self.UEs[i].dropped_packets
 			
-		return [dropped, self.UEs[target].sent_packets]
+		return [dropped, self.UEs[target].sent_packets, np.sum(self.UEs[target].buffer)]
 		
 
 	def clear(self):

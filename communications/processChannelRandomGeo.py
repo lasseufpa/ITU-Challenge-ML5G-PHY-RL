@@ -16,7 +16,7 @@ def friis_propagation(Ptx, R, freq, gain=5):
     Prx = (20*np.log10((h/(4*np.pi*R)**2))+Ptx+gain)
     return Prx
 
-def ULAChannelRandomGeo(data, frequency = 60e6,spread = 1, Nr= 1, Nt = 64):
+def ULAChannelRandomGeo(data, frequency = 60e6,spread = 0.5, Nr= 1, Nt = 64):
     #seed = 75648
     #np.random.seed(seed)  
     numRays = 2
@@ -26,6 +26,9 @@ def ULAChannelRandomGeo(data, frequency = 60e6,spread = 1, Nr= 1, Nt = 64):
     departure = data[0]
     arrival = data[1]
     distance = data[4]
+    print('Angle')
+    print('BS angle: ', departure)
+    print('Drone angle: ',arrival)
 
     gain = abs(np.random.randn(numRays)) + abs(np.random.randn(numRays))
     #gain_in_dB = 20*np.log10(np.abs(gain))  

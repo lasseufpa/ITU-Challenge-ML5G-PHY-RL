@@ -1,0 +1,6 @@
+numpy==1.16.4
+pandas==1.1.5
+matplotlib==3.3.4
+airsim==1.5.0
+stable-baselines==2.10.0
+tensorflow==1.14.0

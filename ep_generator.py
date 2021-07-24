@@ -1,7 +1,7 @@
 '''
 UFPA - LASSE - Telecommunications, Automation and Electronics Research and Development Center - www.lasse.ufpa.br
 CAVIAR - Communication Networks and Artificial Intelligence Immersed in Virtual or Augmented Reality
-Ailton Oliveira, Felipe Bastos, João Borges, Emerson Oliveira, Daniel Takashi, Lucas Matni, Rebecca Aben-Athar, Aldebaro Klautau (UFPA): aldebaro@ufpa.br
+Ailton Oliveira, Felipe Bastos, João Borges, Emerson Oliveira, Daniel Suzuki, Lucas Matni, Rebecca Aben-Athar, Aldebaro Klautau (UFPA): aldebaro@ufpa.br
 CAVIAR: https://github.com/lasseufpa/ITU-Challenge-ML5G-PHY-RL.git
 
 Script to generate datasets from UE4/AirSim simulations
@@ -16,7 +16,7 @@ import os
 
 # Number of trajectories to be executed
 # Each trajectory is an episode
-n_trajectories = 200
+n_trajectories = 500
 
 # Creat a folder to write the UE4 simulation result
 try:
@@ -48,7 +48,7 @@ for episode in range(n_trajectories):
     with open('./episodes/ep' + str(episode) +  '.csv', mode='w', newline='') as csv_file:
 
         # CSV header
-        fieldnames = ["timestamp", "obj", "pos_x", "pos_y", "pos_z", "orien_w", "orien_x", "orien_y", "orien_z", "linear_acc_x", "linear_acc_y", "linear_acc_z", "linear_vel_x", "linear_vel_y", "linear_vel_z", "angular_acc_x", "angular_acc_y", "angular_acc_z", "angular_vel_x", "angular_vel_y", "angular_vel_z"]
+        fieldnames = ["timestamp", "obj", "pos_x", "pos_y", "pos_z", "orien_x", "orien_y", "orien_z", "orien_w", "linear_acc_x", "linear_acc_y", "linear_acc_z", "linear_vel_x", "linear_vel_y", "linear_vel_z", "angular_acc_x", "angular_acc_y", "angular_acc_z", "angular_vel_x", "angular_vel_y", "angular_vel_z"]
 
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
@@ -62,7 +62,7 @@ for episode in range(n_trajectories):
 
             # Get an write information about each UAV in the configuration file (caviar_config.py)
             for uav in caviar_config.drone_ids:
-                uav_pose = caviar_tools.airsim_getpose(client, uav)
+                uav_pose = caviar_tools.airsim_getpose_offset(client, uav)
                 uav_orien = caviar_tools.airsim_getorientation(client, uav)
                 uav_linear_acc = caviar_tools.airsim_getlinearacc(client, uav)
                 uav_linear_vel = caviar_tools.airsim_getlinearvel(client, uav)
@@ -70,12 +70,12 @@ for episode in range(n_trajectories):
                 uav_angular_vel = caviar_tools.airsim_getangularvel(client, uav)
                 airsim_timestamp = caviar_tools.airsim_gettimestamp(client, uav)
 
-                writer.writerow({"timestamp": airsim_timestamp, "obj": uav, "pos_x": uav_pose[0], "pos_y": uav_pose[1], "pos_z": uav_pose[2], "orien_w": uav_orien[0], "orien_x": uav_orien[1], "orien_y": uav_orien[2], "orien_z": uav_orien[3], "linear_acc_x": uav_linear_acc[0], "linear_acc_y": uav_linear_acc[1],"linear_acc_z": uav_linear_acc[2], "linear_vel_x": uav_linear_vel[0], "linear_vel_y": uav_linear_vel[1],"linear_vel_z": uav_linear_vel[2], "angular_acc_x": uav_angular_acc[0], "angular_acc_y": uav_angular_acc[1],"angular_acc_z": uav_angular_acc[2], "angular_vel_x": uav_angular_vel[0], "angular_vel_y": uav_angular_vel[1], "angular_vel_z": uav_angular_vel[2]})
+                writer.writerow({"timestamp": airsim_timestamp, "obj": uav, "pos_x": uav_pose[0], "pos_y": uav_pose[1], "pos_z": uav_pose[2], "orien_w": uav_orien[3], "orien_x": uav_orien[0], "orien_y": uav_orien[1], "orien_z": uav_orien[2], "linear_acc_x": uav_linear_acc[0], "linear_acc_y": uav_linear_acc[1],"linear_acc_z": uav_linear_acc[2], "linear_vel_x": uav_linear_vel[0], "linear_vel_y": uav_linear_vel[1],"linear_vel_z": uav_linear_vel[2], "angular_acc_x": uav_angular_acc[0], "angular_acc_y": uav_angular_acc[1],"angular_acc_z": uav_angular_acc[2], "angular_vel_x": uav_angular_vel[0], "angular_vel_y": uav_angular_vel[1], "angular_vel_z": uav_angular_vel[2]})
 
                 # Check if the UAV is landed or has collided and finish the episode
                 if takeoff_complete:
-                    if (uav_pose[2] >= -0.8):
-                        print('Episode ' + str(episode) + ' concluded with ' + str(timestamp - initial_time) + 's')
+                    if (uav_pose[2] >= 7.5):
+                        print('Episode ' + str(episode) + ' concluded with ' + str(time.time() - initial_time) + 's')
                         client.simPause(False)
                         landed = True
                 else:
@@ -90,4 +90,4 @@ for episode in range(n_trajectories):
                 object_pose = caviar_tools.unreal_getpose(client, obj)
                 object_orien = caviar_tools.unreal_getorientation(client, obj)
 
-                writer.writerow({"timestamp": airsim_timestamp, "obj": obj, "pos_x": object_pose[0], "pos_y": object_pose[1], "pos_z": object_pose[2], "orien_w": object_orien[0], "orien_x": object_orien[1], "orien_y": object_orien[2], "orien_z": object_orien[3], "linear_acc_x": "", "linear_acc_y": "","linear_acc_z": "", "linear_vel_x": "", "linear_vel_y": "","linear_vel_z": "", "angular_acc_x": "", "angular_acc_y": "","angular_acc_z": "", "angular_vel_x": "", "angular_vel_y": "", "angular_vel_z": ""})
+                writer.writerow({"timestamp": airsim_timestamp, "obj": obj, "pos_x": object_pose[0], "pos_y": object_pose[1], "pos_z": object_pose[2], "orien_w": object_orien[3], "orien_x": object_orien[0], "orien_y": object_orien[1], "orien_z": object_orien[2], "linear_acc_x": "", "linear_acc_y": "","linear_acc_z": "", "linear_vel_x": "", "linear_vel_y": "","linear_vel_z": "", "angular_acc_x": "", "angular_acc_y": "","angular_acc_z": "", "angular_vel_x": "", "angular_vel_y": "", "angular_vel_z": ""})

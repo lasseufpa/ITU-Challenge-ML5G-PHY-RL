@@ -1,55 +1,264 @@
-# Radio Strike
+# Radio Strike main links
+>Details about the challenge are available at http://ai5gchallenge.ufpa.br.
 
-Here you find the code for the “ITU-ML5G-PS-006: ML5G-PHY-Reinforcement learning: scheduling and resource allocation”, which is part of the “ITU Artificial Intelligence/Machine Learning in 5G Challenge. 
+>Registration link: https://challenge.aiforgood.itu.int/match/matchitem/39
 
-Details about this challenge are available at http://ai5gchallenge.ufpa.br.
+>Datasets and the renderer (CaviarRenderer-ITU-v1) are available at https://nextcloud.lasseufpa.org/s/WYZAMbSbdocs2DL
 
-Registration link: https://challenge.aiforgood.itu.int/match/matchitem/39
+# Part I) Radio Strike installation and usage
+The instructions below will guide you through the process of installing and using the Radio Strike software, including its baseline RL agent and associated resources.
 
-Datasets are available at https://nextcloud.lasseufpa.org/s/WYZAMbSbdocs2DL
+## I.1) Quick and dirty installation
 
-# Radio Strike Installation
-The instructions will guide you through the process of using Radio Strike and associated resources. 
+1) First obtain the code and place it in a folder (we will assume here that the folder is called `radiostrike`). For instance, you can clone the repository and name the folder with:
 
-## Setting up the environment to run the baseline codes
-The baseline provides an example of a simple reinforcement learning (RL) agent for the RadioStrike-noRT-v1 environment, as adopted for the PS-006 ITU Challenge.
-The provided RL agent uses [Stable-Baselines](https://github.com/Stable-Baselines-Team/stable-baselines) as its framework. Because of that, in our environment we need Python 3.6 and Tensorflow 1.14. Note that the participant is free to adopt a RL library other than Stable-Baselines and deep learning framework.
+       git clone https://github.com/lasseufpa/ITU-Challenge-ML5G-PHY-RL.git radiostrike
 
-For setting up the environment and performing package management, we assume here [Conda](https://docs.conda.io/en/latest/). Again, the participant can use other tools. To create a conda environment with Python 3.6 use the following command ([more info](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-python.html)):  
+    Later, when issuing commands, remember to first go to the radiostrike folder with: 
+    
+       cd radiostrike
+    
+2) Now download the data in folder `episodes_dataset\training` from https://nextcloud.lasseufpa.org/s/WYZAMbSbdocs2DL .
+This data is required by the Python code to generate the RL episodes. Make the corresponding CSV files (a total of 500 files) available at a folder called `radiostrike\episodes`.
+For instance, you should have `radiostrike\episodes\ep0.csv`, `radiostrike\episodes\ep1.csv`, etc., assuming radiostrike is the folder in which you installed the repository.
 
-`$ conda create -n rstrike python=3.6 anaconda`
 
-_OBS: Note that we named the environment as `rstrike`, but you can choose other name as you wish._
+3) Install required packages. The Python packages that we use in this tutorial (numpy, pandas, etc.) are listed in the file `requirements.txt`.
 
-After its creation you need to activate the environment:
+The baseline agent code provides an example of a simple reinforcement learning (RL) agent for the RadioStrike-noRT-v1 environment, as adopted for the PS-006 ITU Challenge.
+The provided RL agent uses [Stable-Baselines](https://github.com/Stable-Baselines-Team/stable-baselines) as its framework. Because of that, in our environment we
+need Python 3.6 and Tensorflow 1.14. Note that the participant is free to adopt a RL library other than Stable-Baselines and another deep learning framework (and eventually
+use another Python version).
 
-`$ conda activate rstrike`
+## I.2) Training and testing the baseline RL agent (when all dependencies are met)
 
-and install these packages:
+If you are facing installation problems, please see the suggestions in other subsections below. In this subsection we assume you have successfully installed
+all required packages. Hence, you can train the baseline RL agent with:
 
-`$ pip3 install airsim tensorflow==1.14.0 stable-baselines==2.10.0`
+    python3 train_agent.py -m <model_name> -ep <first_train_ep_id> <last_train_ep_id>
+
+For example, to create an agent and save it in a file named `baseline.a2c`, training it on the data from episodes 0 to 399, the command is:
+
+    python3 train_agent.py -m baseline.a2c -ep 0 399
+
+Recall that the provided data to create each episode must be available in folder `episodes`. After finishing the training, the agent will be stored in the `./model` folder, created automatically by the end of the first run.
+
+To test the baseline RL agent you can run:
+
+    python3 test_agent.py -m <model_name> -ep <test_ep_id#1> <test_ep_id#n>
+
+This will give you an output file in the folder `./data` named `actions_<model_name>.csv`, in which there will be information regarding the actions performed by the agent
+at each simulation step. For example, a file can have:
+
+|chosen_ue|ue_index|beam_index|
+|---|---|---|
+simulation_pedestrian1|2|32
+simulation_car1|1|63
+uav1|0|	58
+
+You can also get an output with more information by adding `--full-output` flag. This way the output file name is not `actions_<model_name>.csv`, but `output_<model_name>.csv` :
+
+    $ python3 test_agent.py -m <model_name> -ep <test_ep_id#1> <test_ep_id#n> --full-output
+    
+In this case, the output file will have several extra columns, as follows:    
+
+|chosen_ue|ue_index|beam_index|x|y|z|pkts_dropped|
+|---|---|---|---|---|---|---|
+|simulation_pedestrian1|2|32|2.903349|33.66375|7.4372497|0.0
+
+pkts_transmitted|bit_rate_gbps|channel_mag|reward|pkts_buffered|
+|---|---|---|---|---|
+157.0|0.6255017349493768|0.41372613018058246|0.2502006939797507|0
+
+For instance, to use a test set that is disjoint from the previous training set:
+
+    python3 test_agent.py -m baseline.a2c -ep 400 500
+
+or
+
+    python3 test_agent.py -m baseline.a2c -ep 400 500 --full-output
+    
+## I.3) Troubleshooting: typically due to broken dependencies
+
+Most of the times one needs to fix dependencies and install specific versions of Python or its packages.
+
+In this case, it is very convenient to use a virtual environment and better control the package versions.
+Before proceeding with the installation below, please check if you already have Python installed with:
+
+    python --version
+
+_Obs: Be aware: if you already have Python installed, for instance on Windows, but not in a specific virtual environment, sometimes it is better to uninstall it and start from scratch to avoid conflicts._
+
+_Obs: If you are using pip, it is useful to check with `pip freeze` the versions of the installed packages._
+
+We will share below some suggestions to install a given Python version. Recall that because we are adopting the Stable-Baselines RL library, we have adopted Python 3.6.8. 
+
+We will describe options for both Windows and Linux.
+
+## I.4) On Windows: installing a virtual environment and a specific Python version 
+
+You must first download the Python executable for the version you chose. We are assuming it is Python 3.6
+and we will get it from the official [Python website](https://www.python.org/downloads/release/python-368/) (e.g. use this link to directly download for amd64: [Python3.6.exe](https://www.python.org/ftp/python/3.6.8/python-3.6.8-amd64.exe))
+
+_Obs: When starting the installation, check the box "Add Python 3.6 to PATH"_
+
+Install Pip 
+
+```python
+python -m pip install --upgrade pip
+```
+
+Install Pipenv
+```python
+pip install --user pipenv
+```
+
+Because the provided Pipfile lists all dependencies, you can create the environment whith Python 3.6 and install all Radio Strike dependencies using:
+```python
+pipenv install --python 3.6
+```
+
+Activate your environment
+```python
+pipenv shell
+```
+
+You can check if you are using the correct python version with:
+
+     python3 --version
+
+and also the correct packages:
+
+     pip3 freeze
 
 With that you're ready to run the baseline.
 
-``
+## I.5) On Linux: installing a virtual environment with a specific Python version 
 
-## Training and testing the baseline RL agent
-To train you must run:
+### Install pyenv
+To manage python versions we use [pyenv](https://github.com/pyenv/pyenv). Note that there are many other alternatives to install Python versions. For instance, you can follow [link](https://tecadmin.net/install-python-3-6-ubuntu-linuxmint/).
 
-`$ python3 train_agent.py 'agent_name' 'number_of_train_episode'`
+ To install pyenv, first install the Python build dependencies:
+ 
+    $ sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \ libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \ libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
 
-For example, to create an agent named `test.a2c`, trained on the data from episode 0, the command is:
+then, install `pyenv` with:
 
-`$ python3 train_agent.py test 0`
+    $ curl https://pyenv.run | bash
 
-After finishing the training, the agent will be stored in a `./model` folder, created automatically by the end of the first run.
+and add the following in `~/.bashrc` if you use bash, or `~/.zshrc` with you use zsh, to enable `pyenv` in the terminal: 
 
-To test your agent you must run:
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init --path)"
 
-`$ python3 test_agent.py 'agent_name' 'number_of_test_episode'`
+Restart your shell so the path changes take effect:
 
-Similarly, to test the agent from the example above in the same episode, one should run:
+    $ exec $SHELL
+    
+### Download the Python version you want
 
-`$ python3 test_agent.py test 0`
+In our case (to run our Stable Baselines), we download Python 3.6.8:
 
-This will create a folder named `./data` in which the actions of the agent will be stored. The actions will receive the name `actions_'agent_name'.csv`.
+    $ pyenv install 3.6.8
+
+
+### Install pipenv 
+
+For setting up the environment and performing package management, we assume here [pipenv](https://pipenv.pypa.io/en/latest/). 
+
+#### Ubuntu
+
+    $ pipx install pipenv
+
+For other distributions refer to [pipenv installation guide](https://pypi.org/project/pipenv/#description).
+
+#### Required packages
+
+Because the provided Pipfile lists all dependencies, you can create the environment whith Python 3.6 and install all Radio Strike dependencies using:
+```python
+pipenv install --python 3.6
+```
+
+Activate your environment
+```python
+pipenv shell
+```
+
+You can check if you are using the correct python version with:
+
+     python3 --version
+
+and also the correct packages:
+
+     pip3 freeze
+
+With that you're ready to run the baseline.
+
+
+
+## I.6) Radio Strike Renderer
+
+Download the renderer CaviarRenderer-ITU-v1 from https://nextcloud.lasseufpa.org/s/WYZAMbSbdocs2DL .
+
+AirSim needs to find a specific configuration file that we created for Radio Strike. Hence, you should download the [AirSim settings file](https://nextcloud.lasseufpa.org/s/WYZAMbSbdocs2DL?path=%2FCaviarRenderer-ITU-v1%2FAirSim) called settings.json and put
+this file in a folder called `Airsim`, within the folder `Documents`. According to the [AirSim 
+documentation](https://github.com/microsoft/AirSim/blob/master/docs/settings.md), this 
+AirSim subfolder is located at Documents\AirSim on Windows and ~/Documents/AirSim on Linux systems.
+
+At this point the CaviarRender can be executed, to visualize the results in the 3D scenario the *Render mode* needs to be enabled in the configuration menu of CaviarRender.
+
+In order to have a faster execution, it is possible to disable the Unreal Engine graphics by changing the AirSim settings ViewMode.
+To do that, change **"ViewMode": ""** to **"ViewMode": "NoDisplay"** in the file `settings.json` mentioned above.
+
+CaviarRenderer-ITU-v1 performs two distinct things:
+
+1) After having trained a RL agent, CaviarRenderer-ITU-v1 is used to 
+visualize the RL agent actions in the 3D scenario. It indicates the beam directions and also
+the scheduled user (by drawing a bounding box around it). To execute it:
+
+With the 3D scenario running it is possible to visualize the results using the *caviar_render.py* script. This script runs one episode per
+execution and it is necessary to set the episode path in the begin of the script and also the output files with the RL results.
+
+    python3 caviar_render.py
+
+The output of this script is a video with the simulation result. It is currently not feasible to visualize the 3D scenario along the RL training stage. But this is in our "to do" list.
+
+2) CaviarRenderer-ITU-v1 can also be used to create additional episode data, storing the information as .CSV files.
+You can of course use it to create more episodes for your research, 
+but you *cannot* use any extra episodes when training your model for the PS-006 ITU Challenge. The rules restrict
+the models to be trained only with the provided episodes.
+
+The first step to generate new episodes is to create a set of trajectories to be used by the AirSim's UAVs.
+
+The trajectories available [here](https://nextcloud.lasseufpa.org/s/WYZAMbSbdocs2DL?path=%2FCaviarRenderer-ITU-v1%2Fway_points) can be used,
+or new trajectories can be generated using the **random_generator.py** script. It is possible to define the number of trajectories to  be generated by the script.
+
+	cd waypoints/
+	python3 random_generator.py
+	
+With the trajectories ready, the CaviarRender should be executed and, in its menu, choose to disable its **Render mode**.
+Now it is possible to run the **ep_generator.py** script.
+
+	python3 random_generator.py
+	
+The number of episodes, sample rate, trajectories paths and others configurations can be changed in the being of the **ep_generator.py** script.
+
+# Part II) Data organization
+
+The dataset is provided in `.csv` files, that are in the folder `episodes` (i.e `ep0.csv`, `ep1.csv` etc). Each `episode` has approximately 3 minutes of duration, with information stored with a sampling interval of 10 ms. The csv is composed by the following columns:
+
+|timestamp|obj|pos_x|pos_y|pos_z|orien_w|orien_x|
+|---|---|---|---|---|---|---|
+
+|orien_y|orien_z|linear_acc_x|linear_acc_y|linear_acc_z|linear_vel_x|linear_vel_y|
+|---|---|---|---|---|---|---|
+
+|linear_vel_z|angular_acc_x|angular_acc_y|angular_acc_z|angular_vel_x|angular_vel_y|angular_vel_z|
+|---|---|---|---|---|---|---|
+
+There are three different types of objects: `uav`, `simulation_car` and `simulation_pedestrian`. Only the `uav` type has information in all columns, while the others have only information regarding their position and orientation. 
+## Airsim coordinates
+Airsim uses a coordinate type other than unreal, called NED coordinates system, i.e., +X is North, +Y is East and +Z is Down, and the units are in S.I. different from the Unreal Engine which uses centimeters. For more information see [Airsim Documentation](https://github.com/microsoft/AirSim/blob/master/docs/apis.md).
+## Baseline data
+An episode has information regarding all mobile objects in a scene (all pedestrians, etc.). To keep it simple, we assumed that the baseline RL agent uses only information from the three users (`uav1`, `simulation_car1` and `simulation_pedestrian1`). These are the user equipment (UEs) being served by the base station (BS). Hence, the baseline data was obtained by filtering the original episodes to discard the information about all other mobile objects (which are scatterers, not UEs).
