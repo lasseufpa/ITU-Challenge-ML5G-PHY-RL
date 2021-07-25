@@ -28,7 +28,7 @@ class BeamSelectionEnv(Env):
         self.ue1 = UE(name='uav1', obj_type='UAV', total_number_rbs=15, episode = self.eps, use_airsim=False)
         self.ue2 = UE(name='simulation_car1', obj_type='CAR', total_number_rbs=15, episode = self.eps, use_airsim=False)
         self.ue3 = UE(name='simulation_pedestrian1', obj_type='PED', total_number_rbs=15, episode = self.eps, use_airsim=False)
-        self.caviar_bs = BaseStation(Elements=64, frequency=60e9,name='BS1',ep_lenght=20, traffic_type = 'dense', change_type=True)
+        self.caviar_bs = BaseStation(Elements=64, frequency=60e9,name='BS1',ep_lenght=20, traffic_type = 'dense', BS_type = 'UPA', change_type=True)
 
         #Append users
         self.caviar_bs.append(self.ue1)
