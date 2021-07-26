@@ -14,11 +14,7 @@ from communications.base_station import BaseStation
 from communications.ue import UE
 
 use_airsim = False
-if not use_airsim:
-	obj_type = 'automated_test'
-else:
-	obj_type = 'Unreal_object'
-	#obj_type = 'UAV'
+obj_type = 'UAV'
 
 # Test integration
 print('/////////////// Test integration ///////////////')
@@ -36,12 +32,11 @@ caviar_bs.append(ue3)
 user = -1
 action = 32
 
-for i in range(20000):
+for i in range(20):
 	if user == 2:
 		user = -1
 	user += 1
 	state, reward, feedback ,done = caviar_bs.step(user,action)
 	print('User ID: ', caviar_bs.UEs[user].ID, 'Buffer: ', caviar_bs.UEs[user].buffer, 'BS TYPE: ', caviar_bs._type)
-	#print('State: ', state,' Reward: ', reward, 'Dropped packets: ', feedback[0], 'Sent packets: ', feedback[1] ,'Is done ?: ', done )
 	print('###')
 

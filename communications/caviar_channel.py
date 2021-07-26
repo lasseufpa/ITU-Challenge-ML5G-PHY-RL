@@ -10,11 +10,11 @@ def cart2pol(x, y, z):
    #Adjust angular domain to X-axis
     if x == 0:
        x += 0.001
-    rho = np.sqrt(x**2 + y**2)
+    rho = np.sqrt(x**2 + y**2 + z**2)
     phi = np.rad2deg(np.arctan2(y, x))
     if phi < 0:
        phi +=  360
-    elev = np.rad2deg(np.arccos(round(z/rho)))
+    elev = np.rad2deg(np.arccos(z/rho))
     return(elev, phi)
 
 def drone_info(UE = [5,4,3], Bs = [0, 0, 0]):

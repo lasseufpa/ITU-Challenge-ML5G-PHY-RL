@@ -231,8 +231,12 @@ def get_ula_beamangles(wt, Nt, beam_index):
     return ula_angle
 
 def linecount(eps):
+    if len(eps)<2:
+        all_eps = [int(eps[0])]
+    else:
+        all_eps = list(range(int(eps[0]), int(eps[1])+1))
     count = 0
-    for ep in eps:
+    for ep in all_eps:
         episode_file = open(f"./episodes/ep{int(ep)}.csv", 'r') 
         for line in episode_file:
             line = line.split(',')

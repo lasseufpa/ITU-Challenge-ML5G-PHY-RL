@@ -26,9 +26,6 @@ def ULAChannelRandomGeo(data, frequency = 60e6,spread = 0.5, Nr= 1, Nt = 64):
     departure = data[0]
     arrival = data[1]
     distance = data[4]
-    print('Angle')
-    print('BS angle: ', departure)
-    print('Drone angle: ',arrival)
 
     gain = abs(np.random.randn(numRays)) + abs(np.random.randn(numRays))
     #gain_in_dB = 20*np.log10(np.abs(gain))  
