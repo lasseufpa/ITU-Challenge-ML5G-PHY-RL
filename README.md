@@ -35,20 +35,20 @@ use another Python version).
 If you are facing installation problems, please see the suggestions in other subsections below. In this subsection we assume you have successfully installed
 all required packages. Hence, you can train the baseline RL agent with:
 
-    python3 train_agent.py -m <model_name> -ep <first_train_ep_id> <last_train_ep_id>
+    python3 train_b-a2c.py -m <model_name> -ep <first_train_ep_id> <last_train_ep_id>
 
 For example, to create an agent and save it in a file named `baseline.a2c`, training it on the data from episodes 0 to 399, the command is:
 
-    python3 train_agent.py -m baseline.a2c -ep 0 399
+    python3 train_b-a2c.py -m baseline.a2c -ep 0 399
 
 Recall that the provided data to create each episode must be available in folder `episodes`. After finishing the training, the agent will be stored in the `./model` folder, created automatically by the end of the first run.
 
 To test the baseline RL agent you can run:
 
-    python3 test_agent.py -m <model_name> -ep <test_ep_id#1> <test_ep_id#n>
+    python3 test_b-a2c.py -m <model_name> -ep <test_ep_id#1> <test_ep_id#n>
 
-This will give you an output file in the folder `./data` named `actions_<model_name>.csv`, in which there will be information regarding the actions performed by the agent
-at each simulation step. For example, a file can have:
+This will give you several output files in the folder `./data` named `actions_<model_name>_ep<ep_number>.csv`, in which there will be information regarding the actions performed by the agent
+at each simulation step for all the episodes passed. For example, a file can have:
 
 |chosen_ue|ue_index|beam_index|
 |---|---|---|
@@ -56,9 +56,9 @@ simulation_pedestrian1|2|32
 simulation_car1|1|63
 uav1|0|	58
 
-You can also get an output with more information by adding `--full-output` flag. This way the output file name is not `actions_<model_name>.csv`, but `output_<model_name>.csv` :
+You can also get an output with more information by adding `--full-output` flag. This way the output file name is not `actions_<model_name>_ep<ep_number>.csv`, but `output_<model_name>_ep<ep_number>.csv` :
 
-    $ python3 test_agent.py -m <model_name> -ep <test_ep_id#1> <test_ep_id#n> --full-output
+    $ python3 test_b-a2c.py -m <model_name> -ep <test_ep_id#1> <test_ep_id#n> --full-output
     
 In this case, the output file will have several extra columns, as follows:    
 
@@ -66,19 +66,59 @@ In this case, the output file will have several extra columns, as follows:
 |---|---|---|---|---|---|---|
 |simulation_pedestrian1|2|32|2.903349|33.66375|7.4372497|0.0
 
-pkts_transmitted|bit_rate_gbps|channel_mag|reward|pkts_buffered|
+pkts_transmitted|pkts_buffered|bit_rate_gbps|channel_mag|reward|
 |---|---|---|---|---|
-157.0|0.6255017349493768|0.41372613018058246|0.2502006939797507|0
+157.0|805.0|0.6255017349493768|0.41372613018058246|0.2502006939797507|
 
 For instance, to use a test set that is disjoint from the previous training set:
 
-    python3 test_agent.py -m baseline.a2c -ep 400 500
+    python3 test_b-a2c.py -m baseline.a2c -ep 400 500
 
 or
 
-    python3 test_agent.py -m baseline.a2c -ep 400 500 --full-output
-    
-## I.3) Troubleshooting: typically due to broken dependencies
+    python3 test_b-a2c.py -m baseline.a2c -ep 400 500 --full-output
+
+## I.3) Training and testing the baseline dummy agents (when all dependencies are met)
+Besides the RL agent, we also provide "dummy" agents for comparison purposes. There are two and they are called B-Dummy and B-BeamOracle. The B-Dummy agent assumes random action choices for both the scheduled user and which beam index to use. The B-BeamOracle agent follows a sequential user scheduling pattern (ue0-ue1-ue2-ue0-ue1-ue2...) and always uses the optimal beam index for the selected user.
+
+Their operation is equal to the RL agent described above, and they are be called with:
+
+    $ python3 test_b-dummy.py -ep <test_ep_id#1> <test_ep_id#n>
+or
+
+    $ python3 test_b-dummy.py -ep <test_ep_id#1> <test_ep_id#n> --full-output
+
+for the B-Dummy, and
+
+    $ python3 test_b-oracle.py -ep <test_ep_id#1> <test_ep_id#n>
+
+or
+
+    $ python3 test_b-oracle.py -ep <test_ep_id#1> <test_ep_id#n> --full-output
+
+for the B-BeamOracle.
+
+Their outputs are located in a specific folder inside `/data` named `./data/dummy` and `./data/beamoracle`, respectively, and are called `actions_b_dummy_<ep_number>` `output_b_dummy_<ep_number>` in case of the B-Dummy, or `actions_b_beam_oracle_<ep_number>` `output_b_beam_oracle_<ep_number>` in case of the B-BeamOracle.
+
+## I.4) Plotting the results
+To analyze the output data from the agent and the dummies, several tools for plotting charts are provided in the file `plot_tools.py`. You can use it as a class that can be called inside a script or in a quick and dirty way, in which you call it via terminal to plot all the charts available. 
+
+Usage:
+
+    $ python3 plot_tools.py -m <model_name> -ep <test_ep_id#first> <test_ep_id#last> --dummy --oracle
+
+Example:
+
+    $ python3 plot_tools.py -m baseline -ep 0 1 --dummy --oracle
+
+
+To use it, some information must be provided: first the name of the tested RL model (only the name without extension), second, the episodes to test, and finally, if the user will plot the B-Dummy and the B-BeamOracle results as well. 
+
+_Obs: To plot any results, they must be obtained first by running the baselines._ 
+
+_Obs: The method `.read_data()` is used to read the output data of the baselines from an episode or interval of episodes. In case you use the class instead of the terminal version, remember to use `.read_data()` at the beginning of your script, before calling any plot method._
+
+## I.5) Troubleshooting: typically due to broken dependencies
 
 Most of the times one needs to fix dependencies and install specific versions of Python or its packages.
 
@@ -95,7 +135,7 @@ We will share below some suggestions to install a given Python version. Recall t
 
 We will describe options for both Windows and Linux.
 
-## I.4) On Windows: installing a virtual environment and a specific Python version 
+## I.6) On Windows: installing a virtual environment and a specific Python version 
 
 You must first download the Python executable for the version you chose. We are assuming it is Python 3.6
 and we will get it from the official [Python website](https://www.python.org/downloads/release/python-368/) (e.g. use this link to directly download for amd64: [Python3.6.exe](https://www.python.org/ftp/python/3.6.8/python-3.6.8-amd64.exe))
@@ -133,7 +173,7 @@ and also the correct packages:
 
 With that you're ready to run the baseline.
 
-## I.5) On Linux: installing a virtual environment with a specific Python version 
+## I.7) On Linux: installing a virtual environment with a specific Python version 
 
 ### Install pyenv
 To manage python versions we use [pyenv](https://github.com/pyenv/pyenv). Note that there are many other alternatives to install Python versions. For instance, you can follow [link](https://tecadmin.net/install-python-3-6-ubuntu-linuxmint/).
@@ -197,7 +237,7 @@ With that you're ready to run the baseline.
 
 
 
-## I.6) Radio Strike Renderer
+## I.8) Radio Strike Renderer
 
 Download the renderer CaviarRenderer-ITU-v1 from https://nextcloud.lasseufpa.org/s/WYZAMbSbdocs2DL .
 
