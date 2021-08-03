@@ -9,10 +9,8 @@ V1.0
 '''
 
 import numpy as np
-import pandas as pd
 from gym import Env
 from gym.spaces import Box, MultiDiscrete
-from random import randrange
 
 from communications.buffer import Buffer
 from communications.base_station import BaseStation
@@ -42,8 +40,8 @@ class BeamSelectionEnv(Env):
         buffered and bit rate.
         '''        
         self.observation_space = Box(
-            low=np.array([-5e2,-5e2,-5e2,-5e2,0,0,0]), 
-            high=np.array([5e2,5e2,5e2,5e2,1e3,1e3,1e9]),
+            low=np.array([-5e2,-5e2,-5e2,0,0,0,0]), 
+            high=np.array([5e2,5e2,5e2,1e3,1e3,2e4,1e9]),
             shape=(7,)
     )
         '''
@@ -76,7 +74,6 @@ class BeamSelectionEnv(Env):
     
     def best_beam_step(self, target):
         state, reward, info, done = self.caviar_bs.best_beam_step(target)
-                     # dropped packets, sent packets, buffered packets, bitrate, ue_name, packets and channel_mag
         dict_keys = ['pkts_dropped', 'pkts_transmitted', 'pkts_buffered', 'bit_rate', 'chosen_ue', 'best_beam', 'packets', 'channel_mag']
         info = dict(zip(dict_keys, info))
         self.state = state

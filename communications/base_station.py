@@ -151,12 +151,12 @@ class BaseStation():
 			
 		done = self._state >= self.ep_lenght
 		feedback = self.UE_feedback(target)# dropped packets and sent packets
-		feedback.append(buffered_packets) 
-		feedback.append(float(self.R))# dropped packets, sent packets and bitrate
+		feedback.append(buffered_packets) # dropped packets, sent packets and buffered packages
+		feedback.append(float(self.R))# dropped packets, sent packets, buffered packages and bitrate
 		info = feedback[:]
 		dropped_packets = info[0]
 		sent_packets = info[1]
-		info.append(str(self.UEs[target].ID))# dropped packets, sent packets, bitrate and ue_name
+		info.append(str(self.UEs[target].ID))# dropped packets, sent packets, buffered packages, bitrate and ue_name
 		all_packets += buffered_packets
 		info.append(all_packets)
 		info.append(channel_mag)
@@ -198,12 +198,12 @@ class BaseStation():
 			
 		done = self._state >= self.ep_lenght
 		feedback = self.UE_feedback(target)# dropped packets and sent packets
-		feedback.append(buffered_packets) 
-		feedback.append(float(self.R))# dropped packets, sent packets and bitrate
+		feedback.append(buffered_packets) # dropped packets, sent packets and buffered packages
+		feedback.append(float(self.R))# dropped packets, sent packets, buffered packages and bitrate
 		info = feedback[:]
 		dropped_packets = info[0]
 		sent_packets = info[1]
-		info.append(str(self.UEs[target]._ID))# dropped packets, sent packets, bitrate and ue_name
+		info.append(str(self.UEs[target].ID))# dropped packets, sent packets, buffered packages, bitrate and ue_name
 		info.append(index)
 		all_packets += buffered_packets
 		info.append(all_packets)
