@@ -14,6 +14,9 @@ matplotlib = "==3.3.4"
 airsim = "==1.5.0"
 stable-baselines = "==2.10.0"
 tensorflow = "==1.14.0"
+seaborn = "==0.11.1"
+tqdm = "==4.62"
+opencv-python = "==4.5.3.56"
 
 [requires]
 python_version = "3.6"
