@@ -32,11 +32,11 @@ Trains an A2C network and stores it in a file.
 
 Usage:
 
-$ python3 train_agent.py -m <model_name> -ep <train_ep_id#first> <train_ep_id#last>
+$ python3 train_b-a2c.py -m <model_name> -ep <train_ep_id#first> <train_ep_id#last>
 
 Example:
 
-$ python3 train_agent.py -m baseline.a2c -ep 0 1
+$ python3 train_b-a2c.py -m baseline.a2c -ep 0 1
 '''
 parser = argparse.ArgumentParser()
 
