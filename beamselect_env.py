@@ -34,7 +34,7 @@ class BeamSelectionEnv(Env):
         self.caviar_bs.append(self.ue3)
         
         '''
-        The observation space is composed by an array with 6 float numbers. 
+        The observation space is composed by an array with 7 float numbers. 
         The first three represent the user position in XYZ, while the 
         remaining ones are respectively: dropped packages, sent packages, 
         buffered and bit rate.
