@@ -28,6 +28,7 @@ class UE(Buffer):
         else:
             self.client = None # None if will note use Airsim
             self.all_position = caviar_tools.positions_csv(name, self._episodeID)
+            self._all_info = caviar_tools.info_csv(name, self._episodeID)
             self.origin_type = 'CSV'
         self.packet_size = packet_size # size of sent/arrived packets
         self.total_number_rbs=total_number_rbs # resource blocks
@@ -40,6 +41,11 @@ class UE(Buffer):
     @property
     def episodeID(self):
         return self._episodeID
+    
+    @property
+    def all_info(self):
+        infos = next(self._all_info).split(',')
+        return infos
 
 
     def get_pkt_throughput( self, RMbps):
@@ -75,6 +81,7 @@ class UE(Buffer):
                 except StopIteration:
                     raise TypeError("Episodes over")
                 self.all_position = caviar_tools.positions_csv(self._ID, self._episodeID)
+                self._all_info = caviar_tools.info_csv(self._ID, self._episodeID)
                 tmp_list = next(self.all_position).split(',')
             except:
                 raise TypeError("Can't access the episode file")

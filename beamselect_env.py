@@ -38,7 +38,7 @@ class BeamSelectionEnv(Env):
         The first three represent the user position in XYZ, while the 
         remaining ones are respectively: dropped packages, sent packages, 
         buffered and bit rate.
-        '''        
+        '''
         self.observation_space = Box(
             low=np.array([-5e2,-5e2,-5e2,0,0,0,0]), 
             high=np.array([5e2,5e2,5e2,1e3,1e3,2e4,1e9]),
@@ -66,15 +66,13 @@ class BeamSelectionEnv(Env):
     '''
     def step(self, action):
         target, index = action
-        state, reward, info, done = self.caviar_bs.step(target,index)
-        dict_keys = ['pkts_dropped', 'pkts_transmitted', 'pkts_buffered', 'bit_rate', 'chosen_ue', 'packets', 'channel_mag']
-        info = dict(zip(dict_keys, info))
-        self.state = state
+        bs_example_state, bs_example_reward, info, done = self.caviar_bs.step(target,index)
+        self.state = bs_example_state
+        reward = bs_example_reward
         return self.state, reward, done, info
     
     def best_beam_step(self, target):
-        state, reward, info, done = self.caviar_bs.best_beam_step(target)
-        dict_keys = ['pkts_dropped', 'pkts_transmitted', 'pkts_buffered', 'bit_rate', 'chosen_ue', 'best_beam', 'packets', 'channel_mag']
-        info = dict(zip(dict_keys, info))
-        self.state = state
+        bs_example_state, bs_example_reward, info, done = self.caviar_bs.best_beam_step(target)
+        self.state = bs_example_state
+        reward = bs_example_reward
         return self.state, reward, done, info

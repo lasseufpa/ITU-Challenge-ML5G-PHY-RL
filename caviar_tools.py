@@ -89,20 +89,16 @@ def UPA_DFT_angles(Nx, Ny, user_angle):
     elevation.sort()
     #print(elevation)
 
-def all_info_csv(user_id,episode):
+def info_csv(user_id,episode):
     with open('./episodes/ep{}.csv'.format(episode)) as cs:
         episode_data = csv.DictReader(cs)
-        loop = -1
+        info=[]
         for row in episode_data:
             if row['obj'] == user_id:
-                loop += 1
-                values = row.values()
-                array = np.asarray(list(values)) #convert to float
-                if loop == 0:
-                    info = array
-                    continue
-                info = np.vstack((info, array))
-    return info
+                values = list(row.values())
+                tmp_info = str(",".join(values))
+                info.append(tmp_info)
+    return iter(info)
 
 
 def positions_csv(user_id,episode):

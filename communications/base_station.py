@@ -150,10 +150,11 @@ class BaseStation():
 					self._traffic_type = 'dense'
 			
 		done = self._state >= self.ep_lenght
-		feedback = self.UE_feedback(target)# dropped packets and sent packets
-		feedback.append(buffered_packets) # dropped packets, sent packets and buffered packages
-		feedback.append(float(self.R))# dropped packets, sent packets, buffered packages and bitrate
-		info = feedback[:]
+		info = self.UE_feedback(target)# dropped packets and sent packets
+		ue_info = self.UEs[target].all_info #don't call it before call the UE step
+		info.extend(ue_info)
+		info.append(buffered_packets) # dropped packets, sent packets and buffered packages
+		info.append(float(self.R))# dropped packets, sent packets, buffered packages and bitrate
 		dropped_packets = info[0]
 		sent_packets = info[1]
 		info.append(str(self.UEs[target].ID))# dropped packets, sent packets, buffered packages, bitrate and ue_name
@@ -162,8 +163,13 @@ class BaseStation():
 		info.append(channel_mag)
 		
 		reward = (sent_packets - 2*dropped_packets)/all_packets
+		state = np.concatenate((self.UEs[target]._position, [info[0], info[1], info[2], info[3]]), axis=None)
 
-		state = np.concatenate((self.UEs[target]._position, feedback), axis=None)
+		dict_keys = ['pkts_dropped', 'pkts_transmitted', 'timestamp','obj','pos_x','pos_y','pos_z',
+		'orien_x','orien_y','orien_z','orien_w','linear_acc_x','linear_acc_y','linear_acc_z',
+		'linear_vel_x','linear_vel_y','linear_vel_z','angular_acc_x','angular_acc_y','angular_acc_z',
+		'angular_vel_x','angular_vel_y','angular_vel_z', 'pkts_buffered', 'bit_rate', 'chosen_ue', 'packets', 'channel_mag']
+		info = dict(zip(dict_keys, info))
 		return state, reward, info, done
 	
 	def best_beam_step(self, target):
@@ -197,10 +203,11 @@ class BaseStation():
 					self._traffic_type = 'dense'
 			
 		done = self._state >= self.ep_lenght
-		feedback = self.UE_feedback(target)# dropped packets and sent packets
-		feedback.append(buffered_packets) # dropped packets, sent packets and buffered packages
-		feedback.append(float(self.R))# dropped packets, sent packets, buffered packages and bitrate
-		info = feedback[:]
+		info = self.UE_feedback(target)# dropped packets and sent packets
+		ue_info = self.UEs[target].all_info
+		info.extend(ue_info)
+		info.append(buffered_packets) # dropped packets, sent packets and buffered packages
+		info.append(float(self.R))# dropped packets, sent packets, buffered packages and bitrate
 		dropped_packets = info[0]
 		sent_packets = info[1]
 		info.append(str(self.UEs[target].ID))# dropped packets, sent packets, buffered packages, bitrate and ue_name
@@ -210,8 +217,13 @@ class BaseStation():
 		info.append(channel_mag)
 		
 		reward = (sent_packets - 2*dropped_packets)/all_packets
+		state = np.concatenate((self.UEs[target]._position, [info[0], info[1], info[2], info[3]]), axis=None)
 
-		state = np.concatenate((self.UEs[target]._position, feedback), axis=None)
+		dict_keys = ['pkts_dropped', 'pkts_transmitted', 'timestamp','obj','pos_x','pos_y','pos_z',
+		'orien_x','orien_y','orien_z','orien_w','linear_acc_x','linear_acc_y','linear_acc_z',
+		'linear_vel_x','linear_vel_y','linear_vel_z','angular_acc_x','angular_acc_y','angular_acc_z',
+		'angular_vel_x','angular_vel_y','angular_vel_z', 'pkts_buffered', 'bit_rate', 'chosen_ue', 'packets', 'channel_mag']
+		info = dict(zip(dict_keys, info))
 		return state, reward, info, done  
 
 	def UE_feedback(self, target):
