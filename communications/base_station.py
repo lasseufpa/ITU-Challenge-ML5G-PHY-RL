@@ -222,7 +222,8 @@ class BaseStation():
 		dict_keys = ['pkts_dropped', 'pkts_transmitted', 'timestamp','obj','pos_x','pos_y','pos_z',
 		'orien_x','orien_y','orien_z','orien_w','linear_acc_x','linear_acc_y','linear_acc_z',
 		'linear_vel_x','linear_vel_y','linear_vel_z','angular_acc_x','angular_acc_y','angular_acc_z',
-		'angular_vel_x','angular_vel_y','angular_vel_z', 'pkts_buffered', 'bit_rate', 'chosen_ue', 'packets', 'channel_mag']
+		'angular_vel_x','angular_vel_y','angular_vel_z', 'pkts_buffered', 'bit_rate', 'chosen_ue', 
+		'best_beam', 'packets', 'channel_mag']
 		info = dict(zip(dict_keys, info))
 		return state, reward, info, done  
 
