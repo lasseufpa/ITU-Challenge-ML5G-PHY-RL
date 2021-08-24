@@ -5,6 +5,8 @@
 
 >Datasets and the renderer (CaviarRenderer-ITU-v1) are available at https://nextcloud.lasseufpa.org/s/WYZAMbSbdocs2DL
 
+>Additional support material is available at https://nextcloud.lasseufpa.org/s/ZbB3cLN4MGZmwN4
+
 # Part I) Radio Strike installation and usage
 The instructions below will guide you through the process of installing and using the Radio Strike software, including its baseline RL agent and associated resources.
 
@@ -302,3 +304,40 @@ There are three different types of objects: `uav`, `simulation_car` and `simulat
 Airsim uses a coordinate type other than unreal, called NED coordinates system, i.e., +X is North, +Y is East and +Z is Down, and the units are in S.I. different from the Unreal Engine which uses centimeters. For more information see [Airsim Documentation](https://github.com/microsoft/AirSim/blob/master/docs/apis.md).
 ## Baseline data
 An episode has information regarding all mobile objects in a scene (all pedestrians, etc.). To keep it simple, we assumed that the baseline RL agent uses only information from the three users (`uav1`, `simulation_car1` and `simulation_pedestrian1`). These are the user equipment (UEs) being served by the base station (BS). Hence, the baseline data was obtained by filtering the original episodes to discard the information about all other mobile objects (which are scatterers, not UEs).
+
+# Part III) Evaluation
+
+## III.1) What the participant must deliver
+
+The participant must provide: 
+- The predicted output for the test set as a CSV (comma-separated values) file.
+
+  _Obs1: This output can be generated with `test_b-a2c.py`, you just need to pass your model in the argument (the name "b-a2c" comes from the baseline, but you're free to use other RL strategies)._
+
+  _Obs2: This output must contain *at least* the actions of the agent, namely the scheduled user ID and the chosen beam index, for each time step from the test set._
+
+- The participant must also provide two video files:
+
+  - one with the rendering of the RL agent for the episode with the largest value for the return `G`; 
+  - and another for the episode with the smallest value of `G`.
+   
+  _Obs1: These two videos should correspond to the output of CaviarRenderer-ITU-v1 (or later version). If desired, the participant can concatenate the two into a single video._
+  
+  _Obs2: Another option is to expand the video (or videos) by promoting the designed RL agent, describing its architecture or any other thing the participant thinks is interesting. This promoting video must be recorded in Portuguese or English (the organizers can generate the videos for the participants if needed)._
+
+## III.2) Evaluation metric
+The participant with the best return `G` over the test episodes wins. In case of a draw regarding the average return `G` among distinct participants, the tie will be broken using the best video(s).
+
+Note that for the evaluation, the return `G` 
+
+<img src="https://render.githubusercontent.com/render/math?math=\large \color{red} G = \sum_{}^{}r[t]">,
+
+is going to be calculated with the same reward <img src="https://render.githubusercontent.com/render/math?math=\large \color{red} r[t]"> as the baseline agent (`B-A2C`)
+
+<img src="https://render.githubusercontent.com/render/math?math=\large \color{red} r[t] = \frac{P_{\textrm{tx}}[t]-2 P_{d}[t]}{P_{b}[t]}">,
+
+where <img src="https://render.githubusercontent.com/render/math?math=\large \color{red} P_{\textrm{tx}}[t]">, <img src="https://render.githubusercontent.com/render/math?math=\large \color{red} P_{d}[t]">, and <img src="https://render.githubusercontent.com/render/math?math=\large \color{red} P_{b}[t]"> correspond, respectively, to the total amount (summation for all users) of transmitted, dropped and buffered packets at time <img src="https://render.githubusercontent.com/render/math?math=\large \color{red} t">. 
+
+  _Obs1: The reward <img src="https://render.githubusercontent.com/render/math?math=\large \color{red} r[t]"> is restricted to the range <img src="https://render.githubusercontent.com/render/math?math=\large \color{red} -2 \le r[t] \le 1">. At each time <img src="https://render.githubusercontent.com/render/math?math=\large \color{red} t">, a single user can be served, but <img src="https://render.githubusercontent.com/render/math?math=\large \color{red} P_{b}[t]"> accounts for the number of packets in all three buffers. Hence, <img src="https://render.githubusercontent.com/render/math?math=\large \color{red} r[t] = 1"> only if all buffered packages of the scheduled user are transmitted,  while the buffers of the other two users were empty._
+
+  _Obs2: The participant is free to use other rewards, states and RL methods (DQN, A3C, etc.) in the agent design and training._
